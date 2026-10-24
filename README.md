@@ -9,6 +9,8 @@ Built at Monad Blitz Jogja Vol. 2. Runs on Monad testnet.
 - **Demo video:** https://youtu.be/eGK_doZtM1M
 - **Single-screen demo:** https://www.cuanlater.xyz/demo
 
+[![Watch the demo](https://img.youtube.com/vi/eGK_doZtM1M/maxresdefault.jpg)](https://youtu.be/eGK_doZtM1M)
+
 > Never run a web3 app before? Jump to [Run it locally](#run-it-locally). It takes about 2 minutes: clone, install, run.
 
 ## How it works
@@ -26,6 +28,7 @@ Built at Monad Blitz Jogja Vol. 2. Runs on Monad testnet.
 ### What happens when you pay
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'background': '#0d1117', 'primaryColor': '#1f2937', 'primaryTextColor': '#f9fafb', 'primaryBorderColor': '#9ca3af', 'lineColor': '#cbd5e1', 'secondaryColor': '#374151', 'tertiaryColor': '#111827', 'mainBkg': '#1f2937', 'textColor': '#f9fafb', 'actorBkg': '#1f2937', 'actorTextColor': '#f9fafb', 'actorBorder': '#9ca3af', 'actorLineColor': '#9ca3af', 'signalColor': '#e5e7eb', 'signalTextColor': '#f9fafb', 'labelBoxBkgColor': '#1f2937', 'labelBoxBorderColor': '#9ca3af', 'labelTextColor': '#f9fafb', 'loopTextColor': '#f9fafb', 'noteBkgColor': '#374151', 'noteTextColor': '#f9fafb', 'noteBorderColor': '#9ca3af'}}}%%
 sequenceDiagram
     participant U as User wallet (email login)
     participant V as Cuan Card vault (locked stock)
@@ -45,6 +48,7 @@ sequenceDiagram
 ### How repayment and safety work
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'background': '#0d1117', 'primaryColor': '#1f2937', 'primaryTextColor': '#f9fafb', 'primaryBorderColor': '#9ca3af', 'lineColor': '#cbd5e1', 'secondaryColor': '#374151', 'tertiaryColor': '#111827', 'mainBkg': '#1f2937', 'textColor': '#f9fafb', 'actorBkg': '#1f2937', 'actorTextColor': '#f9fafb', 'actorBorder': '#9ca3af', 'actorLineColor': '#9ca3af', 'signalColor': '#e5e7eb', 'signalTextColor': '#f9fafb', 'labelBoxBkgColor': '#1f2937', 'labelBoxBorderColor': '#9ca3af', 'labelTextColor': '#f9fafb', 'loopTextColor': '#f9fafb', 'noteBkgColor': '#374151', 'noteTextColor': '#f9fafb', 'noteBorderColor': '#9ca3af'}}}%%
 sequenceDiagram
     participant U as User wallet
     participant V as Cuan Card vault
@@ -53,26 +57,26 @@ sequenceDiagram
 
     Note over U,A: Starts with $3.02 debt and 1 tNVDA locked
 
-    rect rgb(235, 235, 235)
+    rect rgb(31, 41, 55)
         Note over U,A: A · Price rises to $44 — profit pays
         A-->>V: harvestRange(0, n) (in-page request)
         V->>T: Sell 0.0686 tNVDA to treasury
         Note over V: Debt $0<br/>0.9314 tNVDA ≈ $40.98 left
     end
 
-    rect rgb(235, 235, 235)
+    rect rgb(31, 41, 55)
         Note over U,A: B · No profit — user repays in cash
         U->>V: Repay $3.02 tUSD
         Note over V: Vault holds the $3.02
     end
 
-    rect rgb(235, 235, 235)
+    rect rgb(31, 41, 55)
         Note over U,A: C · Debt exceeds 50% of stock — safety sell to under 35%
         A-->>V: liquidate(user) (in-page request)
         V->>T: Sell just enough tNVDA
     end
 
-    rect rgb(235, 235, 235)
+    rect rgb(31, 41, 55)
         Note over U,A: D · Debt reaches $0 — shares stay locked
         U->>V: withdraw(shares) — no screen yet
         V-->>U: Return remaining tNVDA
