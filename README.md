@@ -6,7 +6,10 @@ Pay at a shop with your stock, without selling it. When your stock goes up, the 
 Built at Monad Blitz Jogja Vol. 2. Runs on Monad testnet.
 
 - **App:** https://www.cuanlater.xyz/
-- **Demo video:** https://youtu.be/eGK_doZtM1M
+- **Demo video:**
+
+https://github.com/user-attachments/assets/c5e2e355-982a-4ea6-afef-68e7879d114f
+
 - **Single-screen demo:** https://www.cuanlater.xyz/demo
 
 > Never run a web3 app before? Jump to [Run it locally](#run-it-locally). It takes about 2 minutes: clone, install, run.
