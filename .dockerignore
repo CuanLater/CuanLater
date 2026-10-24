@@ -1,0 +1,10 @@
+.git
+**/node_modules
+app/.next
+contracts/out
+contracts/cache
+contracts/lib
+contracts/broadcast
+deployments/31337.json
+*.log
+.DS_Store
