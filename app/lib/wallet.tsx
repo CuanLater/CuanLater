@@ -1,7 +1,7 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { PrivyProvider, useLoginWithEmail, usePrivy } from '@privy-io/react-auth';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { PrivyProvider, useCreateWallet, useLoginWithEmail, usePrivy } from '@privy-io/react-auth';
 import { SmartWalletsProvider, useSmartWallets } from '@privy-io/react-auth/smart-wallets';
 import { createWalletClient, encodeFunctionData, http, toHex, type Address, type Hex, type TransactionReceipt } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
@@ -53,6 +53,20 @@ function PrivyWallet({ children }: { children: ReactNode }) {
   const { ready, authenticated, logout } = usePrivy();
   const { sendCode, loginWithCode } = useLoginWithEmail();
   const { client } = useSmartWallets();
+  const { user } = usePrivy();
+  const { createWallet } = useCreateWallet();
+  const creating = useRef(false);
+  // createOnLogin can be skipped (e.g. a login interrupted by RPC errors); without an embedded
+  // wallet there is no smart wallet, so create it ourselves once.
+  const hasEmbedded = !!user?.linkedAccounts.some((a) => a.type === 'wallet' && a.walletClientType === 'privy');
+  useEffect(() => {
+    if (!ready || !authenticated || !user || hasEmbedded || creating.current) return;
+    creating.current = true;
+    createWallet().catch((e) => {
+      console.error('[cuanlater] could not create embedded wallet', e);
+      creating.current = false;
+    });
+  }, [ready, authenticated, user, hasEmbedded, createWallet]);
   const value = useMemo<Wallet>(
     () => ({
       mode: 'privy',
