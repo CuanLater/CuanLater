@@ -9,7 +9,7 @@ Built at Monad Blitz Jogja Vol. 2. Runs on Monad testnet.
 - **Demo video:** `TODO`
 - **Single-screen demo:** https://www.cuanlater.xyz/demo
 
-> Never run a web3 app before? Jump to [Run it locally](#run-it-locally). It takes about 10–15 minutes, and you do not need to touch the contracts.
+> Never run a web3 app before? Jump to [Run it locally](#run-it-locally). It takes about 2 minutes: clone, install, run.
 
 ## How it works
 
@@ -29,19 +29,17 @@ Built at Monad Blitz Jogja Vol. 2. Runs on Monad testnet.
 sequenceDiagram
     participant U as User wallet (email login)
     participant V as Cuan Card vault (locked stock)
-    participant T as Treasury
     participant S as Kantin Blitz (shop wallet)
 
     Note over U,S: Join
-    T->>V: Lock 1 tNVDA
-    Note over V: 1 tNVDA ≈ $40.00<br/>Starting price $40.00 saved
+    V->>V: Mint and lock 1 tNVDA
+    Note over V: 1 tNVDA ≈ $40.00<br/>Entry price $40.00 saved
 
     Note over U,S: Pay a $3.00 coffee
     S-->>U: Charge $3.00 (in-page request)
     U->>V: Approve pay($3.00)
-    V->>T: Lend $3.00
-    T->>S: Send $3.00 tUSD
-    Note over V: Owes treasury $3.02<br/>Stock sold: 0
+    V->>S: Send $3.00 tUSD
+    Note over V: Owes $3.02 (amount + 0.5% fee)<br/>Stock sold: 0
 ```
 
 ### How repayment and safety work
@@ -57,25 +55,26 @@ sequenceDiagram
 
     rect rgb(235, 235, 235)
         Note over U,A: A · Price rises to $44 — profit pays
-        A-->>V: harvest() (in-page request)
-        V->>T: Send 0.0686 tNVDA (profit)
+        A-->>V: harvestRange(0, n) (in-page request)
+        V->>T: Sell 0.0686 tNVDA to treasury
         Note over V: Debt $0<br/>0.9314 tNVDA ≈ $40.98 left
     end
 
     rect rgb(235, 235, 235)
         Note over U,A: B · No profit — user repays in cash
-        U->>V: Repay $3.02
-        V->>T: Send $3.02 tUSD
+        U->>V: Repay $3.02 tUSD
+        Note over V: Vault holds the $3.02
     end
 
     rect rgb(235, 235, 235)
         Note over U,A: C · Debt exceeds 50% of stock — safety sell to under 35%
-        A-->>V: liquidate() (in-page request)
-        V->>T: Send just enough tNVDA
+        A-->>V: liquidate(user) (in-page request)
+        V->>T: Sell just enough tNVDA
     end
 
     rect rgb(235, 235, 235)
-        Note over U,A: D · Debt reaches $0 — unlock
+        Note over U,A: D · Debt reaches $0 — shares stay locked
+        U->>V: withdraw(shares) — no screen yet
         V-->>U: Return remaining tNVDA
     end
 ```
@@ -108,9 +107,9 @@ You can run the whole app against the contracts we already deployed. No Solidity
 | --- | --- | --- |
 | [Node.js](https://nodejs.org) 24 or newer | runs the app and the keeper | `node -v` |
 | Git | to clone the repo | `git --version` |
-| A free [Privy](https://privy.io) account | email login + smart wallets | — |
-| A free [Pimlico](https://pimlico.io) account | pays the network fees | — |
 | [Foundry](https://getfoundry.sh) | **only** if you deploy your own contracts | `forge --version` |
+
+You do **not** need a Privy or Pimlico account, a wallet, or any MON to run the demo. Our shared login and gas sponsorship are already filled in below. You only need your own accounts if you deploy your own copy (step 3).
 
 If `node -v` shows an older version and you use `nvm`:
 
@@ -142,8 +141,9 @@ NEXT_PUBLIC_RPC_URL=https://testnet-rpc.monad.xyz
 NEXT_PUBLIC_RPC_FALLBACK_URL=https://rpc.ankr.com/monad_testnet
 NEXT_PUBLIC_EXPLORER_URL=https://testnet.monadexplorer.com
 
-# Email login + gas sponsorship. Get this in step 3.
-NEXT_PUBLIC_PRIVY_APP_ID=
+# Our shared demo app: email login + gas paid for you. Public value, safe to share.
+# Uses our free quota. Fine for trying it; create your own app before deploying (step 3).
+NEXT_PUBLIC_PRIVY_APP_ID=cmvm002gz02y70gl57jwkzvnt
 
 # Our deployed contracts. Use these to try the app; replace them if you deploy your own.
 NEXT_PUBLIC_CUANLATER_ADDRESS=0xC83CF31497fe6e206B82FA35e16523Fb491774E5
@@ -152,11 +152,13 @@ NEXT_PUBLIC_USD_ADDRESS=0x3a73d22ff7547A020296B6b162B99798Af48a4dA
 NEXT_PUBLIC_SHOP_ADDRESS=0xF977F34dB8a986A0A9edec3E744092c715EF793c
 ```
 
-> **Do not skip the Privy app ID.** If it is empty, the app falls back to a throwaway "burner" wallet. That mode only works on a local Anvil chain: on Monad testnet the burner has 0 MON, so you can look around but every payment fails.
+That is everything you need. The App ID is a public value: it already ships inside the website's JavaScript, so it is safe to have here. What is **not** public is the Pimlico API key, which stays in the Privy dashboard and never goes in this repo.
 
 Every variable is explained in [Environment variables](#environment-variables).
 
-### 3. Set up email login and free gas (Privy + Pimlico)
+### 3. Optional: use your own Privy app
+
+Skip this if you are just trying the app or running the keeper: the block above already logs users in and pays the gas. Do this if you are deploying your own copy, want your own quota, or the shared demo app stops working.
 
 CuanLater uses **Privy** for email login and smart wallets, and **Pimlico** as the paymaster that pays the network fee. Both have free plans and Pimlico's testnet sponsorship is free. No credit card.
 
@@ -307,7 +309,7 @@ There are three env files. You only need the first one to run the app.
 
 | File | Used by | Must fill in |
 | --- | --- | --- |
-| `app/.env.local` | the website | `NEXT_PUBLIC_PRIVY_APP_ID` + the 4 contract addresses |
+| `app/.env.local` | the website | the 4 contract addresses (the Privy App ID is already filled in) |
 | `keeper/.env` | the keeper bot | `RPC_URL`, `KEEPER_PRIVATE_KEY` |
 | `contracts/.env` | deploying contracts only | all five |
 
@@ -317,7 +319,7 @@ There are three env files. You only need the first one to run the app.
 
 | Variable | Required? | What it does |
 | --- | --- | --- |
-| `NEXT_PUBLIC_PRIVY_APP_ID` | **Yes**, for real use | Enables email login and smart wallets. Empty = local burner wallet (Anvil only). |
+| `NEXT_PUBLIC_PRIVY_APP_ID` | **Yes** (pre-filled) | Our shared demo app for email login and gas sponsorship. Public value. Replace it with your own app ID if you deploy. Empty = local burner wallet (Anvil only). |
 | `NEXT_PUBLIC_CUANLATER_ADDRESS` | **Yes** | The vault contract. |
 | `NEXT_PUBLIC_STOCK_ADDRESS` | **Yes** | tNVDA, the demo stock. |
 | `NEXT_PUBLIC_USD_ADDRESS` | **Yes** | tUSD, the demo dollar. |
@@ -352,7 +354,8 @@ There are three env files. You only need the first one to run the app.
 | --- | --- | --- |
 | `next: command not found` / `npm ERR!` on start | dependencies not installed | `cd app && npm install` |
 | `EBADENGINE` or weird syntax errors | Node is older than 24 | `nvm install 24 && nvm use 24`, then `npm install` again |
-| Login form does nothing / no code arrives | no Privy app ID, or email login is off | set `NEXT_PUBLIC_PRIVY_APP_ID`, enable Email login, restart the dev server |
+| Login form does nothing / no code arrives | email login is off, or the app is the wrong one | use the shared App ID from step 2, or enable Email login on your own app, then restart the dev server |
+| Shared demo app stops sending codes, or payments suddenly fail | our free Privy/Pimlico quota ran out | create your own app (step 3) and put its App ID in `app/.env.local` |
 | Privy error `invalid_origin` | this origin is not allowed for your Privy app | add `http://localhost:3000` (and your production domain) under **App settings → Domains** |
 | Logged in, but "Wallet is still loading" forever | Privy cannot create a smart wallet on this chain | add Monad testnet (`10143`) under **Smart Wallets**, with both Pimlico URLs |
 | Payment hangs, or a "user operation" / paymaster error | gas is not being sponsored | check the Pimlico key and URL; check you still have free testnet quota |
