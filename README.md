@@ -447,5 +447,3 @@ node --test app/lib/format.test.ts       # money formatting
 ## Team
 
 CuanLater
-
-@monad @monad_dev @geeky_kartikey
