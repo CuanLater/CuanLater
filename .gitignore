@@ -11,3 +11,4 @@ contracts/lib/
 contracts/broadcast/*/31337/
 deployments/31337.json
 .DS_Store
+.vercel

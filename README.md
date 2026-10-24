@@ -23,6 +23,65 @@ Built at Monad Blitz Jogja Vol. 2. Runs on Monad testnet.
 
 **Your starting value is never touched.** Only profit above what your stock was worth when you joined is sold.
 
+### What happens when you pay
+
+```mermaid
+sequenceDiagram
+    participant U as User wallet (email login)
+    participant V as Cuan Card vault (locked stock)
+    participant T as Treasury
+    participant S as Kantin Blitz (shop wallet)
+
+    Note over U,S: Join
+    T->>V: Lock 1 tNVDA
+    Note over V: 1 tNVDA ≈ $40.00<br/>Starting price $40.00 saved
+
+    Note over U,S: Pay a $3.00 coffee
+    S-->>U: Charge $3.00 (in-page request)
+    U->>V: Approve pay($3.00)
+    V->>T: Lend $3.00
+    T->>S: Send $3.00 tUSD
+    Note over V: Owes treasury $3.02<br/>Stock sold: 0
+```
+
+### How repayment and safety work
+
+```mermaid
+sequenceDiagram
+    participant U as User wallet
+    participant V as Cuan Card vault
+    participant T as Treasury
+    participant A as Anyone (keeper or button)
+
+    Note over U,A: Starts with $3.02 debt and 1 tNVDA locked
+
+    rect rgb(235, 235, 235)
+        Note over U,A: A · Price rises to $44 — profit pays
+        A-->>V: harvest() (in-page request)
+        V->>T: Send 0.0686 tNVDA (profit)
+        Note over V: Debt $0<br/>0.9314 tNVDA ≈ $40.98 left
+    end
+
+    rect rgb(235, 235, 235)
+        Note over U,A: B · No profit — user repays in cash
+        U->>V: Repay $3.02
+        V->>T: Send $3.02 tUSD
+    end
+
+    rect rgb(235, 235, 235)
+        Note over U,A: C · Debt exceeds 50% of stock — safety sell to under 35%
+        A-->>V: liquidate() (in-page request)
+        V->>T: Send just enough tNVDA
+    end
+
+    rect rgb(235, 235, 235)
+        Note over U,A: D · Debt reaches $0 — unlock
+        V-->>U: Return remaining tNVDA
+    end
+```
+
+Solid arrows are Monad transactions; dashed arrows are requests made inside the page. With a little stock, a user can repay at any price, not just when the stock is profitable.
+
 ## Try it online
 
 **One screen:** open [/demo](https://www.cuanlater.xyz/demo). You see the phone, the shop terminal and the price chart side by side.
