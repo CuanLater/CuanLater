@@ -6,8 +6,9 @@ import { cuanLaterAbi, mockUsdAbi } from './abi';
 import { publicClient } from './chain';
 import { CUANLATER, USD } from './deployments';
 
-// One block subscription for the whole page; keeps the last 11 timestamps for "Last block".
-type BlockState = { number: bigint; timestamp: number; intervals: number[] };
+// One block subscription for the whole page; keeps the last 11 polled blocks for "Last block".
+// We poll once a second and skip blocks in between, so block time = seconds elapsed / blocks elapsed.
+type BlockState = { number: bigint; timestamp: number; spanSeconds: number; spanBlocks: number };
 let block: BlockState | null = null;
 const subs = new Set<() => void>();
 let unwatch: (() => void) | null = null;
@@ -15,14 +16,19 @@ let unwatch: (() => void) | null = null;
 function subscribeBlocks(cb: () => void) {
   subs.add(cb);
   if (!unwatch) {
-    const times: number[] = [];
+    const seen: { n: bigint; t: number }[] = [];
     unwatch = publicClient.watchBlocks({
       emitMissed: false,
       onBlock: (b) => {
-        times.push(Number(b.timestamp));
-        if (times.length > 11) times.shift();
-        const intervals = times.slice(1).map((t, i) => t - times[i]);
-        block = { number: b.number!, timestamp: Number(b.timestamp), intervals };
+        seen.push({ n: b.number!, t: Number(b.timestamp) });
+        if (seen.length > 11) seen.shift();
+        const first = seen[0];
+        block = {
+          number: b.number!,
+          timestamp: Number(b.timestamp),
+          spanSeconds: Number(b.timestamp) - first.t,
+          spanBlocks: Number(b.number! - first.n),
+        };
         subs.forEach((s) => s());
       },
       onError: () => {},
@@ -39,10 +45,10 @@ function subscribeBlocks(cb: () => void) {
 
 export const useBlock = () => useSyncExternalStore(subscribeBlocks, () => block, () => null);
 
-/** Average seconds between the last 10 blocks; one decimal. */
+/** Average seconds per block over the last ~10 polls; one decimal. */
 export function blockSeconds(b: BlockState | null) {
-  if (!b || b.intervals.length === 0) return null;
-  return (b.intervals.reduce((x, y) => x + y, 0) / b.intervals.length).toFixed(1);
+  if (!b || b.spanBlocks === 0 || b.spanSeconds === 0) return null;
+  return (b.spanSeconds / b.spanBlocks).toFixed(1);
 }
 
 export type AccountView = {

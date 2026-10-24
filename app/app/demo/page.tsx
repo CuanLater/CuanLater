@@ -32,7 +32,8 @@ export default function Demo() {
   }, [view]);
 
   const step = profitPaid ? 4 : t.status === 'approved' ? 3 : t.status === 'waiting' ? 2 : 1;
-  const weekend = view?.isWeekend ?? false;
+  // same rule as CuanLater.isWeekend(): UTC day, 0 = Sun, 6 = Sat
+  const weekend = view?.isWeekend ?? [0, 6].includes((Math.floor((b?.timestamp ?? Date.now() / 1000) / 86400) + 4) % 7);
   const price = tape?.price ?? START_PRICE;
 
   const act = async (name: string, fn: string, args: readonly unknown[] = []) => {
