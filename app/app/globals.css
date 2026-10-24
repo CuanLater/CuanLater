@@ -1,0 +1,57 @@
+@import './styles/okb.css';
+@import 'tailwindcss';
+
+/* Onchain Kit Base tokens mapped into the Tailwind theme. */
+@theme inline {
+  --font-sans: var(--font-inter), var(--okb-font-ui);
+  --font-mono: var(--font-jetbrains), var(--okb-font-mono);
+  --color-canvas: var(--okb-surface-canvas);
+  --color-raised: var(--okb-surface-raised);
+  --color-sunken: var(--okb-surface-sunken);
+  --color-inverse: var(--okb-surface-inverse);
+  --color-ink: var(--okb-text-primary);
+  --color-ink-2: var(--okb-text-secondary);
+  --color-ink-3: var(--okb-text-tertiary);
+  --color-ink-inverse: var(--okb-text-inverse);
+  --color-line: var(--okb-border-subtle);
+  --color-line-2: var(--okb-border-default);
+  --color-primary: var(--okb-action-primary-bg);
+  --color-primary-hover: var(--okb-action-primary-bg-hover);
+  --color-link: var(--okb-text-link);
+  --color-ok: var(--okb-feedback-success-fg);
+  --color-ok-bg: var(--okb-feedback-success-bg);
+  --color-ok-solid: var(--okb-feedback-success-solid);
+  --color-warn: var(--okb-feedback-warning-fg);
+  --color-warn-bg: var(--okb-feedback-warning-bg);
+  --color-warn-solid: var(--okb-feedback-warning-solid);
+  --color-bad: var(--okb-feedback-danger-fg);
+  --color-bad-bg: var(--okb-feedback-danger-bg);
+  --color-bad-solid: var(--okb-feedback-danger-solid);
+  --color-info: var(--okb-feedback-info-fg);
+  --color-info-bg: var(--okb-feedback-info-bg);
+  --color-card: #17171c;
+  --radius-card: var(--okb-radius-card);
+  --radius-sheet: var(--okb-radius-sheet);
+}
+
+@layer base {
+  body {
+    background: var(--okb-surface-canvas);
+    color: var(--okb-text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  :focus-visible {
+    outline: var(--okb-focus-width) solid var(--okb-focus-color);
+    outline-offset: var(--okb-focus-offset);
+  }
+}
+
+@keyframes scan {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(150px); }
+}
+.scan-line { animation: scan 1s ease-in-out; }

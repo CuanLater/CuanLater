@@ -1,0 +1,8 @@
+{
+  "name": "cuanlater-keeper",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": { "keeper": "node --env-file-if-exists=.env index.ts" },
+  "dependencies": { "viem": "2.57.8" }
+}
