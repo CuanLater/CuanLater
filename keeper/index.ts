@@ -3,6 +3,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { createPublicClient, createWalletClient, http, formatUnits, type Address, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
+import { monadTestnet } from 'viem/chains';
 import { cuanLaterAbi } from '../app/lib/abi.ts';
 
 const RPC_URL = process.env.RPC_URL!;
@@ -16,8 +17,11 @@ const address = (process.env.CUANLATER_ADDRESS ??
   (existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')).cuanLater : undefined)) as Address;
 if (!address) throw new Error('Set CUANLATER_ADDRESS or deploy first');
 
-const chain = { id: CHAIN_ID, name: 'monad', nativeCurrency: { name: 'MON', symbol: 'MON', decimals: 18 }, rpcUrls: { default: { http: [RPC_URL] } } } as const;
-const pub = createPublicClient({ chain, transport: http(RPC_URL), pollingInterval: 500 });
+const chain = CHAIN_ID === monadTestnet.id
+  ? monadTestnet
+  : ({ id: CHAIN_ID, name: 'local', nativeCurrency: { name: 'MON', symbol: 'MON', decimals: 18 }, rpcUrls: { default: { http: [RPC_URL] } } } as const);
+// Public RPC allows 15 req/s per IP: poll once a second and fold the member reads into one multicall.
+const pub = createPublicClient({ chain, transport: http(RPC_URL), pollingInterval: 1000, batch: { multicall: CHAIN_ID === monadTestnet.id } });
 const wallet = createWalletClient({ chain, transport: http(RPC_URL), account: privateKeyToAccount(KEY) });
 const c = { address, abi: cuanLaterAbi } as const;
 

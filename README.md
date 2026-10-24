@@ -15,9 +15,12 @@ Built at Monad Blitz Jogja Vol. 2, on Monad testnet.
 
 | Contract | Address |
 | --- | --- |
-| CuanLater | `TODO` (verified link) |
-| MockStock (tNVDA) | `TODO` |
-| MockUSD (tUSD) | `TODO` |
+| CuanLater | [`0xC83CF31497fe6e206B82FA35e16523Fb491774E5`](https://testnet.monadvision.com/address/0xC83CF31497fe6e206B82FA35e16523Fb491774E5) |
+| MockStock (tNVDA) | [`0x6488cD402d12C14E19175ae0688349586BEe8e7A`](https://testnet.monadvision.com/address/0x6488cD402d12C14E19175ae0688349586BEe8e7A) |
+| MockUSD (tUSD) | [`0x3a73d22ff7547A020296B6b162B99798Af48a4dA`](https://testnet.monadvision.com/address/0x3a73d22ff7547A020296B6b162B99798Af48a4dA) |
+| Shop (Kantin Blitz) | `0xF977F34dB8a986A0A9edec3E744092c715EF793c` |
+
+All three contracts are verified on Sourcify (exact match), shown on MonadVision. The tape step is 5 blocks (Monad testnet ≈ 0.31 s per block, so the rise takes ≈ 14 s).
 
 Addresses are also written to `deployments/10143.json` by the deploy script.
 

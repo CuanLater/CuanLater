@@ -17,11 +17,13 @@ export const chain = defineChain({
   blockExplorers: { default: { name: 'Explorer', url: EXPLORER_URL } },
 });
 
-// Public RPC is rate-limited: never poll faster than 500 ms.
+// Public RPC allows 15 req/s per IP, shared by /demo's two pages and the keeper:
+// poll every second and fold concurrent reads into one multicall.
 export const publicClient = createPublicClient({
   chain,
   transport: fallback([http(rpc), http(rpcFallback)]),
-  pollingInterval: 500,
+  pollingInterval: 1000,
+  batch: { multicall: !isLocal },
 });
 
 export const txUrl = (hash: string) => `${EXPLORER_URL}/tx/${hash}`;

@@ -93,7 +93,7 @@ export function useTerminal() {
     }
   }, []);
 
-  // Watch Paid / Declined for this shop (indexed topic), every 500 ms.
+  // Watch Paid / Declined for this shop (indexed topic), once a second.
   useEffect(() => {
     setList(sales.get().slice(0, 6));
     const t = setInterval(async () => {
@@ -110,7 +110,7 @@ export function useTerminal() {
         cursor.current = to + 1n;
         record(logs.map((l) => ({ ...l, blockNumber: BigInt(l.blockNumber as unknown as Hex) })));
       } catch {}
-    }, 500);
+    }, 1000);
     return () => clearInterval(t);
   }, [record]);
 
